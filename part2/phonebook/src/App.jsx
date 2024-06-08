@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import Numbers from './components/Numbers'
+import Notification from './components/Notification'
 import personsApi from './services/personsApi'
 
 const App = () => {
@@ -9,6 +10,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [isError, setIsError] = useState(false)
 
   // loading persons
   useEffect(()=>{
@@ -27,6 +30,15 @@ const App = () => {
     showPersons = persons
   }
 
+  // message
+  const showMessage = (message, isError) =>{
+    setMessage(message)
+    setIsError(isError)
+    setTimeout(()=>{
+      setMessage(null)
+    }, 4000)
+  }
+
   const handelSubmit = (e)=>{
     e.preventDefault()
     let person = persons.find(person=> person.name === newName)
@@ -38,6 +50,7 @@ const App = () => {
             ...persons,
             newPersonData
           ])
+          showMessage(`Added ${newName}`, false)
           setNewName("")
           setNewNum("")
         })
@@ -54,8 +67,14 @@ const App = () => {
               else
                 return person
             }))
+            showMessage(`Changed ${newName}'s number`, false)
             setNewName("")
             setNewNum("")
+          })
+          .catch((err)=>{
+            showMessage(`Information of ${newName} has already been removed from server`, true)
+            let newPersons = persons.filter(person => person.name !== newName)
+            setPersons(newPersons)
           })
       }
     }
@@ -71,12 +90,18 @@ const App = () => {
           let newPersons = persons.filter(person => person.id !== id)
           setPersons(newPersons)
         })
+        .catch((err)=>{
+          showMessage(`Information of ${person.name} has already been removed from server`, true)
+          let newPersons = persons.filter(person => person.id !== id)
+          setPersons(newPersons)
+        })
     }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} isError={isError}/>
       <Filter filter={filter} setFilter={setFilter}/>
       <PersonForm handelSubmit={handelSubmit} newName={newName} setNewName={setNewName} newNum={newNum} setNewNum={setNewNum}/>
       <Numbers persons={showPersons} handelDelete={handelDelete}/>
