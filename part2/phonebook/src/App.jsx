@@ -19,7 +19,7 @@ const App = () => {
       .then((persons)=>{
         setPersons(persons)
       })
-  },[])
+  },[isError])
 
   // filtering logic
   let showPersons;
@@ -73,8 +73,6 @@ const App = () => {
           })
           .catch((err)=>{
             showMessage(`Information of ${newName} has already been removed from server`, true)
-            let newPersons = persons.filter(person => person.name !== newName)
-            setPersons(newPersons)
           })
       }
     }
@@ -92,8 +90,6 @@ const App = () => {
         })
         .catch((err)=>{
           showMessage(`Information of ${person.name} has already been removed from server`, true)
-          let newPersons = persons.filter(person => person.id !== id)
-          setPersons(newPersons)
         })
     }
   }
